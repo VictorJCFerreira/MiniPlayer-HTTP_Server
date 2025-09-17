@@ -1,7 +1,10 @@
 import socket
 
 # Configurações do servidor
-HOST = ''  # Aceita conexões de qualquer endereço IP
+# Aceita conexões de qualquer endereço IP quando o HOST é ''
+# Colocando o IPv4 da rede WiFI da máquina, deixa ela visivel na rede local para 
+# qualquer dispositivo conectado na mesma rede
+HOST = '0.0.0.0'  
 PORT = 9000
 
 # Cria o socket principal do servidor
@@ -18,7 +21,7 @@ server_socket.bind((HOST, PORT))
 # O número indica o máximo de conexões pendentes
 server_socket.listen(5) 
 
-print(f"Servidor escutando em http://localhost:{PORT}")
+print(f"Servidor escutando em http://{HOST}:{PORT}")
 print("Pressione Ctrl+C para encerrar.")
 
 try:
