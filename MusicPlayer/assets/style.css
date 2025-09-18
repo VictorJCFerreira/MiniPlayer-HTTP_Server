@@ -1,0 +1,101 @@
+/* ---- Paleta de Cores ---- */
+:root {
+    --cor-fundo: #121212;
+    --cor-card: #1e1e1e;
+    --cor-texto-principal: #FFFFFF;
+    --cor-texto-secundario: #b3b3b3;
+    --cor-destaque: #D32F2F;
+    --cor-destaque-hover: #F44336;
+}
+
+/* ---- Estilos Gerais ---- */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+}
+
+/* ---- Layout Principal ---- */
+body {
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--cor-destaque);
+    text-align: center;
+}
+
+/* ---- NOVO: Container da Playlist em Grade ---- */
+.playlist-container {
+    display: grid; /* Ativa o layout em grade */
+    grid-template-columns: repeat(2, 1fr); /* Cria 2 colunas de tamanho igual */
+    gap: 1.5rem; /* Espaçamento entre as músicas (horizontal e vertical) */
+    width: 100%;
+    max-width: 1200px; /* Largura máxima para a grade inteira */
+    margin: 0 auto; /* Centraliza a grade na página */
+}
+
+/* ---- AJUSTE: Estilização de Cada Música (Card) ---- */
+div[id^="musica"] {
+    background-color: var(--cor-card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+    /* REMOVEMOS: width, max-width e margin-bottom, pois a grade agora controla isso */
+}
+
+div[id^="musica"]:hover {
+    transform: translateY(-5px);
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+/* ---- Player de Áudio (sem alterações) ---- */
+audio {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+audio::-webkit-media-controls-panel { background-color: var(--cor-card); }
+audio::-webkit-media-controls-timeline { background-color: #4d4d4d; border-radius: 25px; margin-left: 10px; margin-right: 10px; }
+audio::-webkit-media-progress-bar { background-color: var(--cor-destaque); }
+
+/* ---- Botão "Info" (sem alterações) ---- */
+button {
+    background-color: transparent;
+    border: 1px solid var(--cor-destaque);
+    color: var(--cor-destaque);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s;
+}
+button:hover {
+    background-color: var(--cor-destaque-hover);
+    border-color: var(--cor-destaque-hover);
+    color: var(--cor-texto-principal);
+}
+span[id^="info-"] {
+    margin-left: 1rem;
+    color: var(--cor-texto-secundario);
+    font-style: italic;
+}
+
+/* ---- DICA BÔNUS: Responsividade para Celulares ---- */
+/* Em telas menores que 800px, a grade volta a ter apenas 1 coluna */
+@media (max-width: 800px) {
+    .playlist-container {
+        grid-template-columns: 1fr; /* Apenas uma coluna */
+    }
+}
