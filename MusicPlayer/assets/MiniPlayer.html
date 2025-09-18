@@ -12,6 +12,8 @@
         <audio controls>
             <source src="/music/SuspiciousMinds.mp3" type="audio/mpeg">
         </audio>
+        <button onclick="getFileInfo('/music/SuspiciousMinds.mp3', 'info-musica1')">Info</button>
+        <span id="info-musica1"></span> 
     </div>
 
     <div id="musica2">
@@ -19,6 +21,8 @@
         <audio controls>
             <source src="/music/BillieJean.mp3" type="audio/mpeg">
         </audio>
+        <button onclick="getFileInfo('/music/BillieJean.mp3', 'info-musica2')">Info</button>
+        <span id="info-musica2"></span>
     </div>
 
     <div id="musica3">
@@ -26,6 +30,8 @@
         <audio controls>
             <source src="/music/BitesTheDust.mp3" type="audio/mpeg">
         </audio>
+        <button onclick="getFileInfo('/music/BitesTheDust.mp3', 'info-musica3')">Info</button>
+        <span id="info-musica3"></span>
     </div>
 
     <div id="musica4">
@@ -33,13 +39,56 @@
         <audio controls>
             <source src="/music/ComeAsYouAre.mp3" type="audio/mpeg">
         </audio>
+        <button onclick="getFileInfo('/music/ComeAsYouAre.mp3', 'info-musica4')">Info</button>
+        <span id="info-musica4"></span>
     </div>
 
-    <div id="musica1">
+    <div id="musica5">
         <h2>Feel Good Inc. - Gorillaz</h2>
         <audio controls>
             <source src="/music/FeelGood.mp3" type="audio/mpeg">
         </audio>
+        <button onclick="getFileInfo('/music/FeelGood.mp3', 'info-musica5')">Info</button>
+        <span id="info-musica5"></span>
     </div>
+
+    <script>
+      async function getFileInfo(songPath, infoElementId) {
+        // Pega o elemento na tela onde vamos mostrar o resultado
+        const infoElement = document.getElementById(infoElementId);
+
+        // Mostra uma mensagem de "carregando" para o usuário
+        infoElement.innerHTML = "<i> Carregando...</i>";
+
+        try {
+          // Faz a requisição de rede usando o método 'HEAD'
+          const response = await fetch(songPath, { method: 'HEAD' });
+
+          // Verifica se a resposta do servidor foi um sucesso (status 200-299)
+          if (response.ok) {
+            // Pega o valor do cabeçalho 'Content-Length'
+            const fileSizeInBytes = response.headers.get('Content-Length');
+
+            if (fileSizeInBytes) {
+              // Converte o tamanho de bytes para Megabytes (MB) e formata com 2 casas decimais
+              const fileSizeInMB = (parseInt(fileSizeInBytes) / (1024 * 1024)).toFixed(2);
+              // Exibe o resultado no elemento span
+              infoElement.innerHTML = `<b>Tamanho:</b> ${fileSizeInMB} MB`;
+            } else {
+              infoElement.innerHTML = "Tamanho não informado.";
+            }
+
+          } else {
+            // Se o status for 404 ou outro erro, exibe a informação
+            infoElement.innerHTML = `<b>Erro:</b> Arquivo não encontrado (${response.status})`;
+          }
+        } catch (error) {
+          // Se houver um erro de rede (servidor fora do ar, sem internet)
+          console.error('Erro de rede:', error);
+          infoElement.innerHTML = "<b>Erro de rede.</b>";
+        }
+      }
+    </script>
+    
 </body>
 </html>

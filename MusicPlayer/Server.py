@@ -1,95 +1,100 @@
 import socket
+import os
+import threading
 
-# Passo 1: Configuração Inicial
-HOST = '0.0.0.0'  # Escuta em todas as interfaces de rede
+# Esta função contém TODA a lógica para atender UM cliente
+def handle_client(client_connection, client_address):
+    print(f"Thread para {client_address} iniciada.")
+    try:
+        # Recebe os dados da requisição
+        request_data = client_connection.recv(1024).decode('utf-8')
+        if not request_data:
+            return
+
+        # Extrai o método e o caminho
+        first_line = request_data.split('\n')[0]
+        method, path, _ = first_line.split(' ')
+        print(f"Recurso solicitado: {path} com o método: {method} por {client_address}")
+
+        # Se o caminho for a raiz, serve o MiniPlayer.html
+        if path == '/':
+            path = '/MiniPlayer.html'
+
+        # Monta o caminho completo para o arquivo na pasta 'assets'
+        file_path = "MusicPlayer/assets" + path
+
+        # Verifica se o método é suportado
+        if method not in ['GET', 'HEAD']:
+            response_body = "<html><body><h1>Erro 405: Metodo nao permitido</h1></body></html>".encode('utf-8')
+            response_line = "HTTP/1.1 405 Method Not Allowed\r\n"
+            headers = "Content-Type: text/html; charset=utf-8\r\n"
+            headers += f"Content-Length: {len(response_body)}\r\n"
+            blank_line = "\r\n"
+            http_response = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8') + response_body
+            client_connection.sendall(http_response)
+        
+        else:
+            # Lógica para GET e HEAD com STREAMING
+            with open(file_path, 'rb') as f:
+                file_size = os.path.getsize(file_path)
+                
+                if file_path.endswith('.html'): content_type = 'text/html; charset=utf-8'
+                elif file_path.endswith('.css'): content_type = 'text/css'
+                elif file_path.endswith('.mp3'): content_type = 'audio/mpeg'
+                else: content_type = 'application/octet-stream'
+
+                response_line = "HTTP/1.1 200 OK\r\n"
+                headers = f"Content-Type: {content_type}\r\n"
+                headers += f"Content-Length: {file_size}\r\n"
+                blank_line = "\r\n"
+                response_headers = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8')
+                client_connection.sendall(response_headers)
+
+                if method == 'GET':
+                    try:
+                        while True:
+                            chunk = f.read(4096)
+                            if not chunk: break
+                            client_connection.sendall(chunk)
+                    except (ConnectionResetError, ConnectionAbortedError):
+                        print(f"Cliente {client_address} fechou a conexão durante o streaming.")
+
+    except FileNotFoundError:
+        body = "<html><body><h1>Erro 404: Arquivo nao encontrado</h1></body></html>".encode('utf-8')
+        response_line = "HTTP/1.1 404 Not Found\r\n"
+        headers = "Content-Type: text/html; charset=utf-8\r\n"
+        headers += f"Content-Length: {len(body)}\r\n"
+        blank_line = "\r\n"
+        http_response = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8') + body
+        client_connection.sendall(http_response)
+    except Exception as e:
+        print(f"Erro ao processar requisição de {client_address}: {e}")
+    finally:
+        print(f"Conexão com {client_address} fechada.")
+        client_connection.close()
+
+# --- INÍCIO DA EXECUÇÃO PRINCIPAL ---
+
+# Configuração do Servidor
+HOST = '0.0.0.0'
 PORT = 9000
-
-# Passo 2: Criação e Preparação do Socket Principal
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((HOST, PORT))
 server_socket.listen(5)
-
-print(f"Servidor escutando em http://localhost:{PORT}")
-print("Acesse pelo seu navegador. Pressione Ctrl+C para encerrar.")
+print(f"Servidor CONCORRENTE escutando em http://localhost:{PORT}")
+print("Pressione Ctrl+C para encerrar.")
 
 try:
-    # Passo 3: O Loop Principal do Servidor
+    # O Loop Principal agora só aceita conexões e delega para as threads
     while True:
-        # Aguarda por uma nova conexão
         client_connection, client_address = server_socket.accept()
-        print(f"Nova conexão de {client_address}")
-
-        # Passo 4: Processamento da Requisição do Cliente
-        try:
-            # Recebe os dados da requisição
-            request_data = client_connection.recv(1024).decode('utf-8')
-            if not request_data:
-                continue
-
-            # Extrai o caminho (path) do arquivo solicitado
-            first_line = request_data.split('\n')[0]
-            method, path, _ = first_line.split(' ')
-            
-            print(f"Recurso solicitado: {path}")
-
-            # Se o caminho for a raiz, serve o MiniPlayer.html
-            if path == '/':
-                path = '/MiniPlayer.html'
-
-            # Monta o caminho completo para o arquivo na pasta 'assets'
-            file_path = "MusicPlayer/assets" + path
-
-            # Determina o Content-Type (MIME Type) com base na extensão
-            if file_path.endswith('.html'):
-                content_type = 'text/html; charset=utf-8'
-            elif file_path.endswith('.css'): 
-                content_type = 'text/css'
-            elif file_path.endswith('.mp3'):
-                content_type = 'audio/mpeg'
-            else:
-                content_type = 'application/octet-stream' # Tipo genérico
-
-            # Tenta abrir e ler o arquivo solicitado em modo binário ('rb')
-            with open(file_path, 'rb') as f:
-                file_content = f.read()
-
-            # Monta a resposta de sucesso 200 OK
-            response_line = "HTTP/1.1 200 OK\r\n"
-            headers = f"Content-Type: {content_type}\r\n"
-            headers += f"Content-Length: {len(file_content)}\r\n"
-            blank_line = "\r\n"
-
-            http_response = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8') + file_content
-
-        except FileNotFoundError:
-            # Passo 5: Tratamento de Erro 404
-            body = "<html><body><h1>Erro 404: Arquivo nao encontrado</h1></body></html>".encode('utf-8')
-            response_line = "HTTP/1.1 404 Not Found\r\n"
-            headers = "Content-Type: text/html; charset=utf-8\r\n"
-            headers += f"Content-Length: {len(body)}\r\n"
-            blank_line = "\r\n"
-            
-            http_response = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8') + body
-
-        except Exception as e:
-            # Tratamento para outros erros
-            print(f"Erro ao processar requisição: {e}")
-            body = "<html><body><h1>Erro 500: Erro Interno do Servidor</h1></body></html>".encode('utf-8')
-            response_line = "HTTP/1.1 500 Internal Server Error\r\n"
-            headers = "Content-Type: text/html; charset=utf-8\r\n"
-            headers += f"Content-Length: {len(body)}\r\n"
-            blank_line = "\r\n"
-
-            http_response = response_line.encode('utf-8') + headers.encode('utf-8') + blank_line.encode('utf-8') + body
-            
-        finally:
-            # Envia a resposta HTTP e fecha a conexão com este cliente
-            client_connection.sendall(http_response)
-            client_connection.close()
-
+        client_thread = threading.Thread(
+            target=handle_client,
+            args=(client_connection, client_address)
+        )
+        client_thread.start()
 except KeyboardInterrupt:
     print("\nServidor encerrado.")
 finally:
-    # Fecha o socket principal do servidor
     server_socket.close()
