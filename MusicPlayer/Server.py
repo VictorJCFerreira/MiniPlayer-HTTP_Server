@@ -43,6 +43,8 @@ try:
             # Determina o Content-Type (MIME Type) com base na extensão
             if file_path.endswith('.html'):
                 content_type = 'text/html; charset=utf-8'
+            elif file_path.endswith('.css'): 
+                content_type = 'text/css'
             elif file_path.endswith('.mp3'):
                 content_type = 'audio/mpeg'
             else:
