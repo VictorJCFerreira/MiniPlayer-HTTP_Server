@@ -3,7 +3,7 @@ import os
 import threading
 
 # =====================================================================================
-# FUNÇÃO handle_client: O "TRABALHADOR"
+# FUNÇÃO handle_client
 # =====================================================================================
 # Esta função contém TODA a lógica para atender UM único cliente.
 # Cada cliente conectado terá uma destas funções rodando para ele em uma thread separada.
@@ -103,15 +103,15 @@ def handle_client(client_connection, client_address):
         client_connection.close()
 
 # =====================================================================================
-# EXECUÇÃO PRINCIPAL: O "RECEPCIONISTA"
+# EXECUÇÃO PRINCIPAL
 # =====================================================================================
 
 # Configuração do Socket principal do servidor.
 HOST = '0.0.0.0'  
 PORT = 9000
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Cria um socket TCP.
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Permite reutilizar o endereço.
-server_socket.bind((HOST, PORT))
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET = IPv4 e SOCK_STREAM = TCP
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Reutilizar endereço, evitar erro "Address already in use"
+server_socket.bind((HOST, PORT)) # Associa o socket a um endereço e porta
 server_socket.listen(5) # Permite até 5 conexões pendentes.
 print(f"Servidor CONCORRENTE escutando em http://localhost:{PORT}")
 print("Pressione Ctrl+C para encerrar.")
