@@ -1,6 +1,7 @@
 import socket
 import os
 import threading
+import urllib.parse
 
 # =====================================================================================
 # FUNÇÃO handle_client
@@ -28,8 +29,25 @@ def handle_client(client_connection, client_address):
         if path == '/':
             path = '/MiniPlayer.html'
 
-        # Monta o caminho completo do arquivo no sistema, partindo da pasta 'assets'.
-        file_path = "MusicPlayer/assets" + path
+        # Decodifica URL (por exemplo, espaços codificados como %20)
+        path = urllib.parse.unquote(path)
+
+        # Monta o caminho completo do arquivo em relação ao diretório deste script,
+        # apontando para a pasta 'assets'. Isso evita problemas quando o servidor é
+        # executado a partir de um diretório diferente.
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(base_dir, 'assets')
+        # Remove a barra inicial para usar os.path.join corretamente
+        rel_path = path.lstrip('/')
+        file_path = os.path.join(assets_dir, rel_path)
+
+        # Normaliza o caminho e previne directory traversal garantindo que o
+        # caminho final esteja dentro de assets_dir.
+        normalized_assets = os.path.normpath(assets_dir)
+        normalized_target = os.path.normpath(file_path)
+        # Usamos commonpath para checar que o arquivo está sob assets_dir
+        if os.path.commonpath([normalized_assets, normalized_target]) != normalized_assets:
+            raise FileNotFoundError()
 
         # 3. VERIFICAÇÃO DE MÉTODOS HTTP SUPORTADOS
         # ------------------------------------
