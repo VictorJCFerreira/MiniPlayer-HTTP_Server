@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "pergunta": "Qual e a capital do Brasil?",
+    "opcoes": {
+      "A": "Rio de Janeiro",
+      "B": "Sao Paulo",
+      "C": "Brasilia"
+    },
+    "correta": "C"
+  },
+  {
+    "id": 2,
+    "pergunta": "Qual protocolo e usado para transferir paginas web?",
+    "opcoes": {
+      "A": "HTTP",
+      "B": "FTP",
+      "C": "SMTP"
+    },
+    "correta": "A"
+  },
+  {
+    "id": 3,
+    "pergunta": "Quanto e 10 + 5 * 2?",
+    "opcoes": {
+      "A": "30",
+      "B": "20",
+      "C": "25"
+    },
+    "correta": "B"
+  }
+]
