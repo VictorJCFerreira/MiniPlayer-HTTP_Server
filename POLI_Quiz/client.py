@@ -28,44 +28,47 @@ def receive_messages(s):
 
 # --- Thread Principal (Envia Mensagens) ---
 def start_client():
-    HOST = '127.0.0.1'
-    PORT = 50000
+    # Pergunta o IP do servidor ao iniciar
+    print("--- CONFIGURAÇÃO DE CONEXÃO ---")
+    ip_servidor = input("Digite o IP do servidor (padrão: 127.0.0.1): ").strip()
+    if not ip_servidor:
+        ip_servidor = '127.0.0.1'
+        
+    PORT = 9000 # Lembre-se que mudamos a porta para 9000
 
-    print("Tentando conectar ao servidor do Quiz...")
+    print(f"Tentando conectar a {ip_servidor}:{PORT}...")
+    
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((HOST, PORT))
+        # Tenta conectar no IP digitado
+        s.connect((ip_servidor, PORT))
         print("Conectado! Siga as instruções.")
     except ConnectionRefusedError:
-        print("Não foi possível conectar. O servidor está offline?")
+        print("Não foi possível conectar. Verifique:")
+        print("1. O servidor está rodando?")
+        print("2. O IP está correto?")
+        print("3. O Firewall do servidor está bloqueando a porta 9000?")
+        return
+    except Exception as e:
+        print(f"Erro ao conectar: {e}")
         return
     
+    # ... (O resto do código continua igual: threads, loops, etc.) ...
     # 1. Inicia a thread receptora
-    # daemon=True faz ela fechar quando a thread principal fechar
     recv_thread = threading.Thread(target=receive_messages, args=(s,), daemon=True)
     recv_thread.start()
 
-    # 2. A thread principal fica em loop lendo o input do usuário
     try:
         while True:
-            # O 'input()' bloqueia a thread principal (o que é bom)
-            message = input("> ") # Mostra o prompt '>'
-            
-            # Se a thread receptora morreu (conexão caiu), sai do loop
-            if not recv_thread.is_alive():
-                break
-            
-            # Envia a mensagem do usuário (JOIN, ANSWER, etc.)
+            message = input("> ") 
+            if not recv_thread.is_alive(): break
             try:
                 s.sendall(message.encode('utf-8'))
-            except ConnectionError:
-                break # Sai se não puder enviar
-
+            except ConnectionError: break 
     except KeyboardInterrupt:
-        print("\nSaindo do chat...")
+        print("\nSaindo...")
     finally:
         s.close()
-        print("Conexão fechada.")
 
 if __name__ == "__main__":
     start_client()

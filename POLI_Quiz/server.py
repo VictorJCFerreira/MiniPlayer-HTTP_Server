@@ -239,8 +239,9 @@ def handle_client(conn, addr, game):
 
 # --- THREAD PRINCIPAL ---
 def start_server():
-    HOST = '127.0.0.1'
-    PORT = 50000
+    # Configurações de Rede
+    HOST = '0.0.0.0'  # Escuta em todas as interfaces de rede
+    PORT = 9000       # Porta alterada conforme solicitado
     
     perguntas = carregar_perguntas()
     if not perguntas: return
@@ -249,33 +250,37 @@ def start_server():
     game = Game(perguntas)
 
     # 2. Inicia a thread 'MESTRE DO JOGO'
-    # daemon=True faz a thread fechar automaticamente quando o programa principal fechar
     game_thread = threading.Thread(target=game.run_game_loop, daemon=True)
     game_thread.start()
     print("[SERVIDOR] Thread Mestre do Jogo iniciada.")
 
-    # 3. Inicia o servidor para aceitar conexões de clientes
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        print(f"[SERVIDOR] Escutando em {HOST}:{PORT}. Aguardando jogadores...")
+    # 3. Configuração do Socket Principal (Atualizada)
+    # Usamos AF_INET (IPv4) e SOCK_STREAM (TCP)
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # Permite reusar o endereço imediatamente se o servidor cair
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
+    try:
+        server_socket.bind((HOST, PORT))
+        server_socket.listen(5) # Aceita até 5 conexões na fila de espera
+        print(f"[SERVIDOR] CONCORRENTE escutando em todas as interfaces na porta {PORT}")
+        print(f"[DICA] Para conectar de outro PC, descubra o IP desta maquina (ipconfig/ifconfig).")
+        print("Pressione Ctrl+C para encerrar.")
         
-        # --- ESTE É O BLOCO MÁGICO ---
-        # Este loop 'while True' NUNCA TERMINA.
-        # Ele garante que, após aceitar um cliente, 
-        # o servidor IMEDIATAMENTE volte a esperar pelo próximo.
         while True:
-            # 1. 'accept()' bloqueia e espera pelo Cliente 1
-            conn, addr = s.accept() 
+            # Aceita conexão
+            conn, addr = server_socket.accept()
             
-            # 2. Cliente 1 conectou. Cria uma thread para ele.
+            # Cria thread para o cliente
             client_thread = threading.Thread(target=handle_client, 
                                              args=(conn, addr, game))
             client_thread.start()
             
-            # 3. 'start()' é instantâneo. O loop repete 
-            #    e o servidor volta para o 'accept()' para esperar pelo Cliente 2,
-            #    enquanto a 'client_thread' cuida do Cliente 1.
+    except Exception as e:
+        print(f"\n[ERRO FATAL] Não foi possível iniciar o servidor: {e}")
+    finally:
+        server_socket.close()
 
 if __name__ == "__main__":
     start_server()
