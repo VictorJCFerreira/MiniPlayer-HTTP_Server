@@ -1,32 +1,57 @@
 [
   {
     "id": 1,
-    "pergunta": "Qual e a capital do Brasil?",
+    "pergunta": "Qual e o maior planeta do Sistema Solar?",
     "opcoes": {
-      "A": "Rio de Janeiro",
-      "B": "Sao Paulo",
-      "C": "Brasilia"
+      "A": "Terra",
+      "B": "Jupiter",
+      "C": "Saturno",
+      "D": "Marte"
+    },
+    "correta": "B"
+  },
+  {
+    "id": 2,
+    "pergunta": "Quem escreveu o livro 'Dom Casmurro'?",
+    "opcoes": {
+      "A": "Jose de Alencar",
+      "B": "Jorge Amado",
+      "C": "Machado de Assis",
+      "D": "Clarice Lispector"
     },
     "correta": "C"
   },
   {
-    "id": 2,
-    "pergunta": "Qual protocolo e usado para transferir paginas web?",
+    "id": 3,
+    "pergunta": "Qual elemento quimico tem o simbolo 'O'?",
     "opcoes": {
-      "A": "HTTP",
-      "B": "FTP",
-      "C": "SMTP"
+      "A": "Ouro",
+      "B": "Osmium",
+      "C": "Oxigenio",
+      "D": "Oganessonio"
     },
-    "correta": "A"
+    "correta": "C"
   },
   {
-    "id": 3,
-    "pergunta": "Quanto e 10 + 5 * 2?",
+    "id": 4,
+    "pergunta": "Em que ano o homem pisou na Lua pela primeira vez?",
     "opcoes": {
-      "A": "30",
-      "B": "20",
-      "C": "25"
+      "A": "1959",
+      "B": "1969",
+      "C": "1979",
+      "D": "1989"
     },
     "correta": "B"
+  },
+  {
+    "id": 5,
+    "pergunta": "Qual e a capital da Australia?",
+    "opcoes": {
+      "A": "Sydney",
+      "B": "Melbourne",
+      "C": "Canberra",
+      "D": "Perth"
+    },
+    "correta": "C"
   }
 ]
