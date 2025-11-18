@@ -46,15 +46,15 @@ class GameServer:
     def processar_jogo(self):
         print("[JOGO] Loop iniciado. Aguardando jogadores...")
         while True:
-            time.sleep(1)
+            time.sleep(2)
             
             if self.estado == "ESPERANDO":
                 with self.lock:
                     qtd = len([c for c in self.clients.values() if c['nome']])
                 
                 if qtd >= 2:
-                    self.broadcast({"tipo": "LOBBY", "conteudo": "O jogo começa em 5 segundos..."})
-                    time.sleep(5)
+                    self.broadcast({"tipo": "LOBBY", "conteudo": "O jogo começa em 10 segundos..."})
+                    time.sleep(10)
                     self.estado = "JOGANDO"
 
             elif self.estado == "JOGANDO":
@@ -70,7 +70,7 @@ class GameServer:
                     self.broadcast(msg_pergunta)
                     
                     # 2. Tempo para responder
-                    time.sleep(10)
+                    time.sleep(15)
                     
                     # 3. Corrige
                     texto_res = "Fim da rodada!\n"
@@ -86,7 +86,7 @@ class GameServer:
                                 texto_res += f"❌ {nome} errou.\n"
                     
                     self.broadcast({"tipo": "RESULTADO", "conteudo": texto_res})
-                    time.sleep(4)
+                    time.sleep(5)
                 
                 # Fim do Jogo
                 with self.lock:
@@ -99,7 +99,7 @@ class GameServer:
                 self.estado = "ESPERANDO"
                 with self.lock:
                     for c in self.clients.values(): c['pontos'] = 0
-                time.sleep(5)
+                time.sleep(10)
 
 game = GameServer()
 
